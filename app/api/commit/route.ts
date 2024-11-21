@@ -41,6 +41,7 @@ export const POST = async (): Promise<NextResponse> => {
     );
 
     return NextResponse.json({ success: true, commitUrl: data.commit.html_url });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     console.error(error.response?.data || error.message);
     return NextResponse.json(

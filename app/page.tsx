@@ -22,7 +22,8 @@ const Home = () => {
         const errorData = await response.json();
         setResult({ success: false, error: errorData.error });
       }
-    } catch (error) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  } catch (error) {
       setResult({ success: false, error: 'An unexpected error occurred' });
     } finally {
       setLoading(false);
