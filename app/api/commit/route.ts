@@ -20,32 +20,31 @@ export const POST = async (): Promise<NextResponse> => {
   });
 
   try {
-    // Fetch the README file from the repository
-    const { data: fileData } = await githubApi.get(
-      `/repos/${GITHUB_REPO_OWNER}/${GITHUB_REPO_NAME}/contents/README.md`,
-      { params: { ref: GITHUB_BRANCH } }
-    );
+    // Step 1: Generate the markdown file name and content
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const fileName = `markdown_${timestamp}.md`;
+    const filePath = `app/documents/${fileName}`;
+    const fileContent = `# Hello World\n\nThis file was created at ${timestamp}.`;
 
-    const currentContent = Buffer.from(fileData.content, 'base64').toString('utf-8');
-    const updatedContent = `${currentContent}\nUpdated at ${new Date().toISOString()}`;
+    // Step 2: Encode the content to Base64 for GitHub API
+    const encodedContent = Buffer.from(fileContent).toString('base64');
 
-    // Commit the changes to README.md
+    // Step 3: Commit the file to the repository
     const { data } = await githubApi.put(
-      `/repos/${GITHUB_REPO_OWNER}/${GITHUB_REPO_NAME}/contents/README.md`,
+      `/repos/${GITHUB_REPO_OWNER}/${GITHUB_REPO_NAME}/contents/${filePath}`,
       {
-        message: 'Auto-update via Next.js App Router',
-        content: Buffer.from(updatedContent).toString('base64'),
-        sha: fileData.sha,
+        message: `Create ${fileName} with Hello World content`,
+        content: encodedContent,
         branch: GITHUB_BRANCH,
       }
     );
 
     return NextResponse.json({ success: true, commitUrl: data.commit.html_url });
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     console.error(error.response?.data || error.message);
     return NextResponse.json(
-      { success: false, error: 'Failed to update the repository' },
+      { success: false, error: 'Failed to create or commit the markdown file.' },
       { status: 500 }
     );
   }
